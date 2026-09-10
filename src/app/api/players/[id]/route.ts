@@ -32,7 +32,6 @@ export async function PATCH(
   const parsed = parsePlayerBody(raw);
   if (isSafeError(parsed)) return NextResponse.json({ error: parsed.error }, { status: parsed.status });
 
-  // Read current row (for old tier + sort_order preservation)
   const { data: oldRow, error: fetchErr } = await supabase
     .from('players')
     .select('tier, sort_order')
@@ -45,7 +44,6 @@ export async function PATCH(
   const updates: Record<string, unknown> = { ...parsed };
 
   if (newTier !== oldTier) {
-    // Preserve position only when tier unchanged; let movePlayerTier handle sort_order.
     delete (updates as { sort_order?: unknown }).sort_order;
   }
 
@@ -58,7 +56,6 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // Apply tier-ordering rules (skipped when same tier → position unchanged).
   try {
     await movePlayerTier(supabase, id, oldTier, newTier);
   } catch (e) {
@@ -86,7 +83,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Need the tier to reindex after deletion.
   const { data: row } = await supabase
     .from('players')
     .select('tier')
@@ -101,7 +97,6 @@ export async function DELETE(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // Reindex remaining players in the same tier (preserves relative order, recalculates ranks).
   if (tier) {
     const { data: rest, error: reErr } = await supabase
       .from('players')

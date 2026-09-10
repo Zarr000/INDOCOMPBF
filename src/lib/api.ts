@@ -13,14 +13,13 @@ async function handle<T>(res: Response): Promise<T> {
       const body = await res.json();
       if (body?.error && typeof body.error === 'string' && body.error.length < 120) message = body.error;
     } catch {
-      // ignore parse errors
+
     }
     throw new Error(message || `Request failed (${res.status})`);
   }
   return res.json() as Promise<T>;
 }
 
-// Returns auth headers (bearer access token) if a session exists.
 async function authHeaders(): Promise<Record<string, string>> {
   const supabase = createBrowserSupabase();
   const { data } = await supabase.auth.getSession();
@@ -28,7 +27,6 @@ async function authHeaders(): Promise<Record<string, string>> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ---------- Public data (landing / talents pages) ----------
 
 export async function getPlayers(): Promise<Player[]> {
   const res = await fetch(`${API_BASE}/players`, { cache: 'no-store' });
@@ -41,8 +39,6 @@ export async function getTalents(): Promise<Talent[]> {
   const data = await handle<{ talents: Talent[] }>(res);
   return data.talents;
 }
-
-// ---------- Auth (browser client — session persisted by supabase/ssr) ----------
 
 const supabase = createBrowserSupabase();
 
@@ -65,8 +61,6 @@ export async function adminMe(): Promise<{ user: { email?: string } | null }> {
   if (!user || user.app_metadata?.role !== 'admin') return { user: null };
   return { user: { email: user.email ?? undefined } };
 }
-
-// ---------- Player CRUD ----------
 
 export async function createPlayer(payload: PlayerPayload): Promise<Player> {
   const res = await fetch(`${API_BASE}/players`, {
@@ -94,7 +88,6 @@ export async function deletePlayer(id: string): Promise<void> {
   await handle<{ ok: boolean }>(res);
 }
 
-// ---------- Talents ----------
 
 // holderValue: a player name to assign, or null/'Example' to release.
 export async function updateTalentHolder(talentId: string | number, holderValue: string | null): Promise<void> {
@@ -108,7 +101,6 @@ export async function updateTalentHolder(talentId: string | number, holderValue:
   await handle<{ ok: boolean }>(res);
 }
 
-// ---------- Images ----------
 
 export interface PlayerMedia {
   name: string;

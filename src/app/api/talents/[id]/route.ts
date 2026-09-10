@@ -18,7 +18,6 @@ export async function PATCH(
 
   const { holder } = await request.json();
 
-  // Resolve holder name -> player.id. null / empty / 'Example' => release.
   let holderId: number | null = null;
   if (holder && String(holder).trim().toLowerCase() !== 'example') {
     const { data: pd, error: pErr } = await supabase

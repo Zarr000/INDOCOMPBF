@@ -32,7 +32,6 @@ export function tierPriority(tier: string): number {
   return TIER_PRIORITY[tier] ?? 99;
 }
 
-// Re-index a tier to a contiguous 0..N-1 sort_order based on current order.
 export async function reindexTier(
   supabase: SupabaseClient,
   tier: string
@@ -52,7 +51,6 @@ export async function reindexTier(
   }
 }
 
-// Insert a new player at the BOTTOM of its tier.
 export async function insertAtBottom(
   supabase: SupabaseClient,
   payload: Omit<Row, 'id' | 'created_at' | 'updated_at'> & {
@@ -82,10 +80,6 @@ export async function insertAtBottom(
   return data as Row;
 }
 
-// Move an existing player between tiers following the rules:
-//  - moved UP (new tier higher priority):  bottom of destination
-//  - moved DOWN (new tier lower priority): top of destination
-//  - same tier: preserve current position
 export async function movePlayerTier(
   supabase: SupabaseClient,
   playerId: number,
@@ -93,13 +87,11 @@ export async function movePlayerTier(
   newTier: string
 ): Promise<void> {
   if (oldTier === newTier) {
-    return; // preserve position (caller must not touch sort_order)
+    return; 
   }
 
-  // Detach from old tier: clear gap (reindex old tier contiguously).
   await reindexTier(supabase, oldTier);
 
-  // Fetch the destination tier players ordered by sort_order asc.
   const { data: existing, error: listErr } = await supabase
     .from('players')
     .select('id, sort_order')
@@ -111,14 +103,11 @@ export async function movePlayerTier(
 
   let orderedIds: number[];
   if (movingUp) {
-    // BOTTOM of destination tier
     orderedIds = [...existing.map((p) => (p as { id: number }).id), playerId];
   } else {
-    // MOVED DOWN -> TOP of destination tier
     orderedIds = [playerId, ...existing.map((p) => (p as { id: number }).id)];
   }
 
-  // Reassign sort_order = index
   for (let i = 0; i < orderedIds.length; i++) {
     const { error: updErr } = await supabase
       .from('players')
