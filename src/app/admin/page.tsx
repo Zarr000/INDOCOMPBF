@@ -1042,9 +1042,12 @@ function ModalBackdrop({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md"
+      style={{ minHeight: '100dvh', alignItems: 'safe center' }}
     >
-      {children}
+      <div className="flex min-h-0 max-h-[100dvh] w-full max-w-2xl flex-col py-4">
+        {children}
+      </div>
     </motion.div>
   );
 }
@@ -1350,9 +1353,9 @@ function PlayerModal({
           y: 10,
         }}
         onSubmit={handleSubmit}
-        className="glass my-8 w-full max-w-2xl rounded-2xl border border-white/[0.08] p-6 shadow-2xl"
+        className="glass my-auto flex max-h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-white/[0.08] p-6 shadow-2xl sm:my-8"
       >
-        <div className="mb-6 flex items-start justify-between">
+        <div className="mb-6 flex flex-shrink-0 items-start justify-between">
           <div>
             <h3 className="font-bebas text-3xl">
               {title}
@@ -1375,13 +1378,14 @@ function PlayerModal({
         </div>
 
         {error && (
-          <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
+          <div className="mb-5 flex flex-shrink-0 items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
             <AlertCircle size={16} />
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <FormField label="Player Name">
             <input
               required
@@ -1509,9 +1513,10 @@ function PlayerModal({
               className="admin-input"
             />
           </FormField>
+          </div>
         </div>
 
-        <div className="mt-7 flex justify-end gap-3">
+        <div className="mt-7 flex flex-shrink-0 justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
