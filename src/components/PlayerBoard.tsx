@@ -85,7 +85,7 @@ export default function PlayerBoard({
   const filterKey = `${platform}-${activeFruit}-${activeTier}`;
 
   return (
-    <main className="min-h-screen bg-black relative">
+    <main className="relative min-h-screen bg-transparent">
       <Hero />
 
       <PlatformTabs active={platform} onChange={handlePlatformChange} />

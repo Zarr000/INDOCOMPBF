@@ -251,7 +251,7 @@ export default function Hero() {
       <motion.div
         animate={{ y: [0, 10, 0], opacity: [0.4, 0.8, 0.4] }}
         transition={{ duration: 2.5, repeat: Infinity }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 flex flex-col items-center gap-2 sm:bottom-7"
       >
         <div
           className="w-5 h-8 rounded-full border flex items-start justify-center p-1.5"

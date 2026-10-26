@@ -188,7 +188,7 @@ export default function TierSection({ tier, displayName, players, playerTalents,
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-40px' }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5"
+          className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
         >
           {players.map((player, playerIndex) => (
             <motion.div key={player.id} variants={cardItem} layout>

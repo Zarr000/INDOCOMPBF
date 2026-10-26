@@ -21,9 +21,9 @@ export default function PlatformTabs({
     <div
       role="tablist"
       aria-label="Platform"
-      className={`flex justify-center px-5 ${size === 'lg' ? 'pt-5 pb-8 sm:pt-7 sm:pb-10' : 'pb-8'}`}
+      className={`flex justify-center px-5 ${size === 'lg' ? 'pt-8 pb-10 sm:pt-10 sm:pb-12' : 'pb-8'}`}
     >
-      <div className="flex items-end gap-8 sm:gap-14">
+      <div className="glass flex items-center gap-1 rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:gap-2">
         {PLATFORMS.map((platform) => {
           const isActive = platform === active;
 
@@ -34,8 +34,8 @@ export default function PlatformTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(platform)}
-              className={`relative cursor-pointer select-none pb-3 transition-colors duration-300 ${
-                isActive ? 'text-white/95' : 'text-white/30 hover:text-white/60'
+              className={`relative min-w-[92px] cursor-pointer select-none rounded-full px-5 py-3 text-center transition-colors duration-300 ${
+                isActive ? 'bg-white/[0.12] text-white shadow-[0_0_24px_rgba(255,255,255,0.08)]' : 'text-white/30 hover:bg-white/[0.05] hover:text-white/60'
               }`}
               style={{
                 fontFamily: 'var(--font-bebas), Impact, sans-serif',
@@ -50,7 +50,7 @@ export default function PlatformTabs({
               {isActive && (
                 <motion.span
                   layoutId={layoutId}
-                  className="absolute bottom-0 left-0 right-0 block text-white"
+                  className="absolute bottom-1 left-1/2 block w-10 -translate-x-1/2 text-white"
                   style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.35))' }}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 >

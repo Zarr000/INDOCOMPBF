@@ -69,12 +69,13 @@ export default function PlayerCard({ player, talents, index }: PlayerCardProps) 
         style={{ boxShadow: '0 0 40px rgba(255,255,255,0.06), 0 16px 50px rgba(0,0,0,0.5)' }}
       />
       <div
-        className="relative h-full rounded-[1.05rem] overflow-hidden flex flex-col"
+        className="glass glass-hover glow-border relative h-full rounded-[1.05rem] overflow-hidden flex flex-col"
         style={{
-          background: 'rgba(10, 10, 10, 0.88)',
-          backdropFilter: 'blur(30px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(30px) saturate(1.6)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'linear-gradient(145deg, rgba(30,30,30,0.62), rgba(5,5,5,0.78))',
+          backdropFilter: 'blur(28px) saturate(1.45)',
+          WebkitBackdropFilter: 'blur(28px) saturate(1.45)',
+          border: '1px solid rgba(255,255,255,0.11)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 18px 45px rgba(0,0,0,0.28)',
           transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
         }}
         onMouseEnter={(e) => {
