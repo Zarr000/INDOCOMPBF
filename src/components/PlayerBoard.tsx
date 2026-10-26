@@ -7,29 +7,55 @@ import TierSection from '@/components/TierSection';
 import FruitFilter, { FruitFilterValue } from '@/components/FruitFilter';
 import TierFilter, { TierFilterValue } from '@/components/TierFilter';
 import ProtestSection from '@/components/ProtestSection';
+import PlatformTabs from '@/components/PlatformTabs';
 import Footer from '@/components/Footer';
 import { groupPlayersByTier, getTierOrder, getTierDisplayName } from '@/lib/groupPlayers';
 import { Player } from '@/types/player';
 import { Talent } from '@/types/talent';
+import { PLATFORM_LABEL, syncPlatformToUrl, type Platform } from '@/lib/platform';
 
-export default function PlayerBoard({ players, talents }: { players: Player[]; talents: Talent[] }) {
+export default function PlayerBoard({
+  players,
+  talents,
+  initialPlatform,
+}: {
+  players: Player[];
+  talents: Talent[];
+  initialPlatform: Platform;
+}) {
+  const [platform, setPlatform] = useState<Platform>(initialPlatform);
   const [activeFruit, setActiveFruit] = useState<FruitFilterValue>('ALL');
   const [activeTier, setActiveTier] = useState<TierFilterValue>('ALL');
 
+  const handlePlatformChange = (next: Platform) => {
+    setPlatform(next);
+    syncPlatformToUrl(next);
+  };
+
+  const platformPlayers = useMemo(
+    () => players.filter((p) => p.platform === platform),
+    [players, platform]
+  );
+
+  const platformTalents = useMemo(
+    () => talents.filter((t) => t.platform === platform),
+    [talents, platform]
+  );
+
   const playerTalents = useMemo(() => {
     const map: Record<string, string[]> = {};
-    talents.forEach((t) => {
+    platformTalents.forEach((t) => {
       if (t.holder_id) {
         if (!map[t.holder_id]) map[t.holder_id] = [];
         map[t.holder_id].push(t.name);
       }
     });
     return map;
-  }, [talents]);
+  }, [platformTalents]);
 
   const groupedPlayers = useMemo(() => {
-    return groupPlayersByTier(players);
-  }, [players]);
+    return groupPlayersByTier(platformPlayers);
+  }, [platformPlayers]);
 
   const tierOrder = getTierOrder();
 
@@ -56,11 +82,13 @@ export default function PlayerBoard({ players, talents }: { players: Player[]; t
     return result as typeof groupedPlayers;
   }, [activeFruit, activeTier, groupedPlayers, tierOrder]);
 
-  const filterKey = `${activeFruit}-${activeTier}`;
+  const filterKey = `${platform}-${activeFruit}-${activeTier}`;
 
   return (
     <main className="min-h-screen bg-black relative">
       <Hero />
+
+      <PlatformTabs active={platform} onChange={handlePlatformChange} />
 
       <FruitFilter active={activeFruit} onChange={setActiveFruit} />
 
@@ -81,6 +109,12 @@ export default function PlayerBoard({ players, talents }: { players: Player[]; t
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
+            {platformPlayers.length === 0 && (
+              <p className="px-5 pb-24 text-center font-rajdhani text-sm uppercase tracking-[0.2em] text-white/30">
+                No players ranked on {PLATFORM_LABEL[platform]} yet.
+              </p>
+            )}
+
             {tierOrder.map((tier, index) => (
               <TierSection
                 key={tier}

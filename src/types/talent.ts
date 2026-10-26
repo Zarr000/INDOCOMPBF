@@ -1,4 +1,5 @@
 import { Player } from './player';
+import type { Platform } from '@/lib/platform';
 
 export interface Talent {
   id: string;
@@ -6,6 +7,7 @@ export interface Talent {
   category: 'fruit' | 'sword';
   holder_id: string | null;
   icon: string;
+  platform: Platform;
   holder: string;
   holderPlayer?: Player | null;
   created_at?: string;

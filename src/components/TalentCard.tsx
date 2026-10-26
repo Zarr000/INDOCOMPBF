@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Player } from '@/types/player';
 
@@ -88,12 +89,12 @@ export default function TalentCard({ talent, player, index }: TalentCardProps) {
                 opacity: 0.5,
               }}
             />
-            <img
+            <Image
               src={talent.icon}
-              alt={talent.name}
-              loading="lazy"
-              decoding="async"
-              className="relative w-28 h-28 object-contain drop-shadow-lg"
+              alt={`${talent.name} icon`}
+              width={112}
+              height={112}
+              className="relative h-28 w-28 object-contain drop-shadow-lg"
             />
           </div>
 
@@ -128,11 +129,14 @@ export default function TalentCard({ talent, player, index }: TalentCardProps) {
                         className="w-10 h-10 rounded-lg object-cover"
                         />
                     ) : (
-                        <img
-                        src={playerImage}
-                        alt={displayName}
-                        className="w-10 h-10 rounded-lg object-cover"
-                        />
+                        <Image
+                         src={playerImage}
+                         alt={`${displayName} profile`}
+                         width={40}
+                         height={40}
+                         unoptimized
+                         className="h-10 w-10 rounded-lg object-cover"
+                         />
                     )
                 ) : (
                     <div
@@ -169,3 +173,5 @@ export default function TalentCard({ talent, player, index }: TalentCardProps) {
     </motion.div>
   );
 }
+
+

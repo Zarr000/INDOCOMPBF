@@ -13,6 +13,7 @@ export interface Database {
           discord: string | null;
           youtube: string | null;
           tiktok: string | null;
+          platform: string;
           created_at: string;
           updated_at: string;
           sort_order: number;
@@ -28,6 +29,7 @@ export interface Database {
           discord?: string | null;
           youtube?: string | null;
           tiktok?: string | null;
+          platform?: string;
           sort_order?: number;
         };
         Update: {
@@ -40,6 +42,7 @@ export interface Database {
           discord?: string | null;
           youtube?: string | null;
           tiktok?: string | null;
+          platform?: string;
           sort_order?: number;
         };
         Relationships: [];
@@ -51,6 +54,7 @@ export interface Database {
           category: string;
           holder_id: number | null;
           icon: string;
+          platform: string;
           created_at: string;
           updated_at: string;
         };
@@ -60,12 +64,14 @@ export interface Database {
           category: string;
           holder_id?: number | null;
           icon: string;
+          platform?: string;
         };
         Update: {
           name?: string;
           category?: string;
           holder_id?: number | null;
           icon?: string;
+          platform?: string;
         };
         Relationships: [];
       };

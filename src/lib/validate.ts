@@ -1,3 +1,5 @@
+import { isPlatform, type Platform } from '@/lib/platform';
+
 export const VALID_TIERS = [
   'HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5',
 ] as const;
@@ -83,6 +85,7 @@ export type PlayerInput = {
   discord: string | null;
   youtube: string | null;
   tiktok: string | null;
+  platform: Platform;
 };
 
 export function parsePlayerBody(raw: unknown): PlayerInput | SafeError {
@@ -115,6 +118,11 @@ export function parsePlayerBody(raw: unknown): PlayerInput | SafeError {
     return clientError('Invalid fruit');
   }
 
+  const platformRaw = str(player.platform, 10);
+  if (platformRaw === null) return clientError('Invalid platform');
+  if (platformRaw !== '' && !isPlatform(platformRaw)) return clientError('Invalid platform');
+  const platform: Platform = platformRaw === 'mobile' ? 'mobile' : 'pc';
+
   const discordRaw = str(player.discord, MAX_URL);
   const youtube = str(player.youtube, MAX_URL);
   const tiktokRaw = str(player.tiktok, MAX_URL);
@@ -134,6 +142,7 @@ export function parsePlayerBody(raw: unknown): PlayerInput | SafeError {
     discord,
     youtube: youtube || null,
     tiktok,
+    platform,
   };
 }
 

@@ -18,11 +18,22 @@ export async function PATCH(
 
   const { holder } = await request.json();
 
+  // A talent can only be held by a player of the same platform.
+  const { data: talent, error: tErr } = await supabase
+    .from('talents')
+    .select('id, platform')
+    .eq('id', Number(params.id))
+    .maybeSingle();
+  if (tErr || !talent) {
+    return NextResponse.json({ error: 'Talent not found' }, { status: 404 });
+  }
+
   let holderId: number | null = null;
   if (holder && String(holder).trim().toLowerCase() !== 'example') {
     const { data: pd, error: pErr } = await supabase
       .from('players')
       .select('id')
+      .eq('platform', talent.platform)
       .ilike('name', holder.trim())
       .maybeSingle();
     if (pErr) {

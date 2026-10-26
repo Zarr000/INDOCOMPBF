@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -94,7 +95,7 @@ export default function ImagePickerField({ value, onChange, playerName }: Props)
 
   return <div className="space-y-3">
     <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl glass border-white/10">
-      {value ? isVideo(value) ? <video src={value} autoPlay loop muted playsInline className="h-full w-full object-cover" /> : <img src={value} alt={playerName || 'Player media'} className="h-full w-full object-cover" /> : <ImagePlus className="h-8 w-8 text-white/25" />}
+      {value ? isVideo(value) ? <video src={value} autoPlay loop muted playsInline className="h-full w-full object-cover" /> : <Image src={value} alt={playerName || 'Player media'} width={112} height={112} unoptimized className="h-full w-full object-cover" /> : <ImagePlus className="h-8 w-8 text-white/25" />}
       {uploading && <div className="absolute inset-0 flex items-center justify-center bg-black/70"><Loader2 className="h-6 w-6 animate-spin text-white/80" /></div>}
     </div>
     <button type="button" onClick={() => setPanelOpen((open) => !open)} aria-expanded={panelOpen} className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-white/65 transition hover:text-white"><Upload className="h-3.5 w-3.5" /> Upload media <ChevronDown className={`h-3.5 w-3.5 transition-transform ${panelOpen ? 'rotate-180' : ''}`} /></button>
@@ -122,3 +123,5 @@ export default function ImagePickerField({ value, onChange, playerName }: Props)
     {!panelOpen && error && <p role="alert" className="text-xs text-red-400">{error}</p>}
   </div>;
 }
+
+

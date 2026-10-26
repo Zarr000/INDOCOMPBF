@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Platform } from '@/lib/platform';
 type Row = {
   id: number;
   legacy_id: string;
@@ -10,6 +11,7 @@ type Row = {
   discord: string | null;
   youtube: string | null;
   tiktok: string | null;
+  platform: Platform;
   created_at: string;
   updated_at: string;
   sort_order: number;
@@ -32,13 +34,17 @@ export function tierPriority(tier: string): number {
   return TIER_PRIORITY[tier] ?? 99;
 }
 
+// Every ordering function works inside ONE platform, so PC and Mobile never
+// shift each other's positions.
 export async function reindexTier(
   supabase: SupabaseClient,
-  tier: string
+  tier: string,
+  platform: Platform
 ): Promise<void> {
   const { data, error } = await supabase
     .from('players')
     .select('id')
+    .eq('platform', platform)
     .eq('tier', tier)
     .order('sort_order', { ascending: true });
   if (error) throw error;
@@ -61,6 +67,7 @@ export async function insertAtBottom(
   const { data: maxRow, error: maxErr } = await supabase
     .from('players')
     .select('sort_order')
+    .eq('platform', payload.platform)
     .eq('tier', payload.tier)
     .order('sort_order', { ascending: false })
     .limit(1)
@@ -84,17 +91,19 @@ export async function movePlayerTier(
   supabase: SupabaseClient,
   playerId: number,
   oldTier: string,
-  newTier: string
+  newTier: string,
+  platform: Platform
 ): Promise<void> {
   if (oldTier === newTier) {
     return; 
   }
 
-  await reindexTier(supabase, oldTier);
+  await reindexTier(supabase, oldTier, platform);
 
   const { data: existing, error: listErr } = await supabase
     .from('players')
     .select('id, sort_order')
+    .eq('platform', platform)
     .eq('tier', newTier)
     .order('sort_order', { ascending: true });
   if (listErr) throw listErr;

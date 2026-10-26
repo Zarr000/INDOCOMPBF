@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import { Bebas_Neue, Rajdhani, Outfit } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import './globals.css';
@@ -46,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="id"
       className={`scroll-smooth ${bebasNeue.variable} ${rajdhani.variable} ${outfit.variable}`}
     >
       <body className="bg-[#030303] text-white relative antialiased">
@@ -61,10 +62,12 @@ export default function RootLayout({
               backgroundSize: '80px 80px',
             }}
           />
-          <div className="absolute top-0 left-0 w-[700px] h-[700px] bg-white/[0.025] rounded-full blur-[140px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-white/[0.025] rounded-full blur-[140px] translate-x-1/2 translate-y-1/2" />
+          <div className="absolute top-0 left-0 h-[min(60vw,700px)] w-[min(60vw,700px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.025] blur-[100px]" />
+          <div className="absolute bottom-0 right-0 h-[min(60vw,700px)] w-[min(60vw,700px)] translate-x-1/2 translate-y-1/2 rounded-full bg-white/[0.025] blur-[100px]" />
         </div>
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
         {children}
 
         <Analytics />

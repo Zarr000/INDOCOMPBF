@@ -10,14 +10,18 @@ export default function Particles() {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     let animFrame: number;
     let W = 0, H = 0;
 
     const resize = () => {
-      W = canvas.width = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -27,7 +31,7 @@ export default function Particles() {
       r: number; alpha: number; alphaDir: number;
     };
 
-    const count = 55;
+    const count = window.innerWidth < 640 ? 24 : 42;
     const particles: P[] = Array.from({ length: count }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,

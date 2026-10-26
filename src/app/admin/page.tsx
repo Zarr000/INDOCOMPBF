@@ -2,7 +2,8 @@
 
 //admin page
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -37,6 +38,8 @@ import {
 import { Player, Tier } from '@/types/player';
 import { discordDisplay, normalizeDiscord, normalizeTikTok, tikTokDisplay } from '@/lib/validate';
 import ImagePickerField from '@/components/admin/ImagePickerField';
+import PlatformTabs from '@/components/PlatformTabs';
+import { PLATFORM_LABEL, type Platform } from '@/lib/platform';
 
 
 const TIERS = [
@@ -72,6 +75,8 @@ type ModalType = 'add' | 'edit' | 'delete' | null;
 
 export default function AdminPage() {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [platform, setPlatform] = useState<Platform>('pc');
+  const loadSeq = useRef(0);
 
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
@@ -92,22 +97,27 @@ export default function AdminPage() {
   const [selectedPlayer, setSelectedPlayer] =
     useState<Player | null>(null);
 
-  const loadPlayers = async () => {
+  // Loads the players of ONE platform. A newer call always wins, so quickly
+  // switching tabs can never show the wrong list.
+  const loadPlayers = async (target: Platform = platform) => {
+    const seq = ++loadSeq.current;
     try {
       setLoading(true);
       setError(null);
 
-      const data = await getPlayers();
+      const data = await getPlayers(target);
+      if (seq !== loadSeq.current) return;
       setPlayers(data);
     } catch (err) {
       console.error(err);
+      if (seq !== loadSeq.current) return;
       setError(
         err instanceof Error
           ? err.message
           : 'Failed to load players.'
       );
     } finally {
-      setLoading(false);
+      if (seq === loadSeq.current) setLoading(false);
     }
   };
 
@@ -121,7 +131,6 @@ export default function AdminPage() {
           return;
         }
         setAuthenticated(true);
-        await loadPlayers();
       } catch {
         setAuthenticated(false);
         setLoading(false);
@@ -132,6 +141,13 @@ export default function AdminPage() {
 
     checkAuth();
   }, []);
+
+  // Loads (and reloads) the list whenever the admin logs in or switches platform.
+  useEffect(() => {
+    if (!authenticated) return;
+    loadPlayers(platform);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, platform]);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -150,8 +166,6 @@ export default function AdminPage() {
 
       setAuthenticated(true);
       setLoginPassword('');
-
-      await loadPlayers();
     } catch (err) {
       console.error(err);
 
@@ -363,6 +377,23 @@ export default function AdminPage() {
           </NavButton>
         </nav>
 
+        {/* PLATFORM */}
+        <PlatformTabs
+          size="md"
+          layoutId="admin-platform-underline"
+          active={platform}
+          onChange={(next) => {
+            if (next === platform) return;
+            setPlayers([]);
+            setSearch('');
+            setTierFilter('ALL');
+            setFruitFilter('ALL');
+            setError(null);
+            setSuccessMessage(null);
+            setPlatform(next);
+          }}
+        />
+
         {/* ERROR */}
         {error && (
           <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
@@ -383,7 +414,7 @@ export default function AdminPage() {
           <StatCard
             label="Total Players"
             value={players.length.toString()}
-            description="Registered players"
+            description={`Registered ${PLATFORM_LABEL[platform]} players`}
             icon={<Users size={19} />}
           />
 
@@ -411,7 +442,7 @@ export default function AdminPage() {
               </h2>
 
               <p className="font-outfit text-sm text-white/35">
-                Search, filter and manage ranked players.
+                Search, filter and manage ranked {PLATFORM_LABEL[platform]} players.
               </p>
             </div>
 
@@ -580,7 +611,8 @@ export default function AdminPage() {
         {modal === 'add' && (
           <PlayerModal
             title="Add Player"
-            description="Create a new ranked player."
+            description={`Create a new ranked ${PLATFORM_LABEL[platform]} player.`}
+            platform={platform}
             onClose={closeModal}
             onSubmit={handleCreate}
           />
@@ -589,7 +621,8 @@ export default function AdminPage() {
         {modal === 'edit' && selectedPlayer && (
           <PlayerModal
             title="Edit Player"
-            description={`Editing ${selectedPlayer.name}`}
+            description={`Editing ${selectedPlayer.name} (${PLATFORM_LABEL[selectedPlayer.platform]})`}
+            platform={selectedPlayer.platform}
             player={selectedPlayer}
             onClose={closeModal}
             onSubmit={(payload) =>
@@ -876,12 +909,7 @@ function PlayerRow({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <img
-                src={playerImageSrc(player.image)}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
+              <Image src={playerImageSrc(player.image)} alt={`${player.name} profile`} width={44} height={44} unoptimized className="h-full w-full object-cover" />
             )
           )}
         </div>
@@ -952,12 +980,7 @@ function MobilePlayerCard({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <img
-                src={playerImageSrc(player.image)}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
+              <Image src={playerImageSrc(player.image)} alt={`${player.name} profile`} width={44} height={44} unoptimized className="h-full w-full object-cover" />
             )
           )}
         </div>
@@ -1055,12 +1078,14 @@ function ModalBackdrop({
 function PlayerModal({
   title,
   description,
+  platform,
   player,
   onClose,
   onSubmit,
 }: {
   title: string;
   description: string;
+  platform: Platform;
   player?: Player;
   onClose: () => void;
   onSubmit: (
@@ -1130,7 +1155,7 @@ function PlayerModal({
   useEffect(() => {
     let cancelled = false;
 
-    getTalents()
+    getTalents(platform)
       .then((data) => {
         if (cancelled) return;
 
@@ -1174,7 +1199,7 @@ function PlayerModal({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [platform, player?.name]);
 
   const fruitTalentOptions = talents.filter(
     (t) => t.category === 'fruit'
@@ -1236,6 +1261,7 @@ function PlayerModal({
       discord: normalizedDiscord ?? '',
       youtube: youtube.trim(),
       tiktok: normalizedTikTok ?? '',
+      platform,
     };
 
     try {
@@ -1676,3 +1702,5 @@ function FormField({
     </div>
   );
 }
+
+

@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -22,6 +22,9 @@ export default function Navbar() {
   const borderOpacity = useTransform(scrollY, [0, 80], [0, 0.08]);
 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const platformQuery = searchParams.get('platform') === 'mobile' ? '?platform=mobile' : '';
+  const internalHref = (href: string) => (href.startsWith('http') ? href : `${href}${platformQuery}`);
 
   const isAdminRoute = pathname.startsWith('/admin');
 
@@ -76,7 +79,7 @@ export default function Navbar() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
         <div className="flex items-center justify-between h-16 sm:h-[70px]">
-          <Link href="/" className="group flex flex-col gap-0.5">
+          <Link href={internalHref('/')} className="group flex flex-col gap-0.5">
 
             <motion.span
               whileHover={{ letterSpacing: '0.06em' }}
@@ -111,7 +114,7 @@ export default function Navbar() {
                     target: '_blank',
                     rel: 'noopener noreferrer',
                   }
-                : { href };
+                : { href: internalHref(href) };
 
               return (
                 <motion.div
@@ -236,7 +239,7 @@ export default function Navbar() {
             ) : (
               <Link
                 key={label}
-                href={href}
+                href={internalHref(href)}
                 className="py-3 text-sm font-semibold tracking-widest uppercase text-white/70"
                 onClick={() => setMenuOpen(false)}
               >

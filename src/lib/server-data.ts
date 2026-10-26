@@ -2,13 +2,17 @@ import { createClient } from '@/lib/supabase/server';
 import type { Player, Tier } from '@/types/player';
 import type { Talent } from '@/types/talent';
 import { tierPriority } from '@/lib/player-order';
+import type { Platform } from '@/lib/platform';
 
-export async function getPlayers(): Promise<Player[]> {
+// Without a platform, both PC and Mobile players are returned (each has a `platform` field).
+export async function getPlayers(platform?: Platform): Promise<Player[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('players')
     .select('*')
     .order('sort_order', { ascending: true });
+  if (platform) query = query.eq('platform', platform);
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);
@@ -32,15 +36,18 @@ export async function getPlayers(): Promise<Player[]> {
       discord: p.discord ?? undefined,
       youtube: p.youtube ?? undefined,
       tiktok: p.tiktok ?? undefined,
+      platform: p.platform,
     }));
 }
 
-export async function getTalents(): Promise<Talent[]> {
+export async function getTalents(platform?: Platform): Promise<Talent[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('talents')
-    .select('*, players(id, legacy_id, name, image, tier, country, fruit)')
+    .select('*, players(id, legacy_id, name, image, tier, country, fruit, platform)')
     .order('id');
+  if (platform) query = query.eq('platform', platform);
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);
@@ -49,7 +56,7 @@ export async function getTalents(): Promise<Talent[]> {
   return (data ?? []).map((t) => {
     const holder = t.players as {
       id: number; legacy_id: string; name: string; image: string;
-      tier: string; country: string; fruit: string | null;
+      tier: string; country: string; fruit: string | null; platform: Platform;
     } | null;
 
     return {
@@ -58,6 +65,7 @@ export async function getTalents(): Promise<Talent[]> {
       category: t.category,
       holder_id: t.holder_id === null ? null : String(t.holder_id),
       icon: t.icon,
+      platform: t.platform,
       holder: holder ? holder.name : 'Example',
       holderPlayer: holder
         ? {
@@ -68,6 +76,7 @@ export async function getTalents(): Promise<Talent[]> {
             country: holder.country,
             image: holder.image,
             fruit: holder.fruit ?? undefined,
+            platform: holder.platform,
           }
         : null,
     };

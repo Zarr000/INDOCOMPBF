@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Player } from '@/types/player';
 import { MessageCircle, Youtube, Music2 } from 'lucide-react';
@@ -131,17 +132,13 @@ export default function PlayerCard({ player, talents, index }: PlayerCardProps) 
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
-                <img
+                <Image
                   src={mediaSrc}
-                  alt={player.name}
-                  loading="lazy"
-                  decoding="async"
-                  onError={(e) => {
-                    const el = e.currentTarget as HTMLImageElement;
-                    el.style.display = 'none';
-                  }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ display: 'block' }}
+                  alt={`${player.name} profile`}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               )}
 
@@ -234,21 +231,14 @@ export default function PlayerCard({ player, talents, index }: PlayerCardProps) 
 
           {fruit && (
             <div className="flex-shrink-0 self-center">
-              <img
+              <Image
                 src={`/fruits/${fruit}.png`}
                 alt={`${fruit} fruit`}
                 title={fruit}
-                onError={(e) => {
-                  const el = e.currentTarget as HTMLImageElement;
-                  el.style.display = 'none';
-                }}
+                width={68}
+                height={68}
                 className="object-contain transition-transform duration-200 hover:scale-110"
-                style={{
-                  width: 68,
-                  height: 68,
-                  opacity: 0.93,
-                  filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.8))',
-                }}
+                style={{ opacity: 0.93, filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.8))' }}
               />
             </div>
           )}

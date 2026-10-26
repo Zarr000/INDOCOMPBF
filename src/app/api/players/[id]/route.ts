@@ -34,7 +34,7 @@ export async function PATCH(
 
   const { data: oldRow, error: fetchErr } = await supabase
     .from('players')
-    .select('tier, sort_order')
+    .select('tier, sort_order, platform')
     .eq('id', id)
     .single();
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 404 });
@@ -42,6 +42,8 @@ export async function PATCH(
   const oldTier = oldRow!.tier;
   const newTier = parsed.tier;
   const updates: Record<string, unknown> = { ...parsed };
+  // A player never changes platform after creation.
+  delete updates.platform;
 
   if (newTier !== oldTier) {
     delete (updates as { sort_order?: unknown }).sort_order;
@@ -57,7 +59,7 @@ export async function PATCH(
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   try {
-    await movePlayerTier(supabase, id, oldTier, newTier);
+    await movePlayerTier(supabase, id, oldTier, newTier, oldRow!.platform);
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : 'reindex failed' },
@@ -85,10 +87,11 @@ export async function DELETE(
 
   const { data: row } = await supabase
     .from('players')
-    .select('tier')
+    .select('tier, platform')
     .eq('id', id)
     .single();
   const tier = row?.tier;
+  const platform = row?.platform;
 
   const { error } = await supabase
     .from('players')
@@ -97,10 +100,11 @@ export async function DELETE(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  if (tier) {
+  if (tier && platform) {
     const { data: rest, error: reErr } = await supabase
       .from('players')
       .select('id, sort_order')
+      .eq('platform', platform)
       .eq('tier', tier)
       .order('sort_order', { ascending: true });
     if (!reErr) {

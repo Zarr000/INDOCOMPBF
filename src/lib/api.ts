@@ -3,6 +3,7 @@
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import type { Player, PlayerPayload, Tier } from '@/types/player';
 import type { Talent, TalentPayload } from '@/types/talent';
+import type { Platform } from '@/lib/platform';
 
 const API_BASE = '/api';
 
@@ -28,14 +29,16 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 
-export async function getPlayers(): Promise<Player[]> {
-  const res = await fetch(`${API_BASE}/players`, { cache: 'no-store' });
+export async function getPlayers(platform?: Platform): Promise<Player[]> {
+  const query = platform ? `?platform=${platform}` : '';
+  const res = await fetch(`${API_BASE}/players${query}`, { cache: 'no-store' });
   const data = await handle<{ players: Player[] }>(res);
   return data.players;
 }
 
-export async function getTalents(): Promise<Talent[]> {
-  const res = await fetch(`${API_BASE}/talents`, { cache: 'no-store' });
+export async function getTalents(platform?: Platform): Promise<Talent[]> {
+  const query = platform ? `?platform=${platform}` : '';
+  const res = await fetch(`${API_BASE}/talents${query}`, { cache: 'no-store' });
   const data = await handle<{ talents: Talent[] }>(res);
   return data.talents;
 }

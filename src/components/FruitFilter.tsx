@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export type FruitFilterValue = 'ALL' | 'KITSUNE' | 'PORTAL' | 'DOUGH' | 'CONTROL' | 'SOUND' | 'DIAMOND';
@@ -80,16 +81,14 @@ export default function FruitFilter({ active, onChange }: FruitFilterProps) {
                 )}
 
                 {icon && (
-                  <img
+                  <Image
                     src={icon}
-                    alt={label}
+                    alt={`${label} fruit`}
+                    width={20}
+                    height={20}
                     className="relative z-10 object-contain"
                     style={{
-                      width: 20,
-                      height: 20,
-                      filter: isActive
-                        ? 'drop-shadow(0 0 6px rgba(255,255,255,0.5))'
-                        : 'opacity(0.55)',
+                      filter: isActive ? 'drop-shadow(0 0 6px rgba(255,255,255,0.5))' : 'opacity(0.55)',
                       opacity: isActive ? 1 : 0.55,
                       transition: 'opacity 0.25s, filter 0.25s',
                     }}

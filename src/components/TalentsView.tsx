@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TalentCard from '@/components/TalentCard';
+import PlatformTabs from '@/components/PlatformTabs';
+import { syncPlatformToUrl, type Platform } from '@/lib/platform';
 import type { Talent } from '@/types/talent';
 
 const TAB_META: Record<'fruit' | 'sword', { label: string }> = {
@@ -25,8 +27,22 @@ function HorizontalRule() {
   );
 }
 
-export default function TalentsView({ talents }: { talents: Talent[] }) {
+export default function TalentsView({
+  talents: allTalents,
+  initialPlatform,
+}: {
+  talents: Talent[];
+  initialPlatform: Platform;
+}) {
   const [activeTab, setActiveTab] = useState<'fruit' | 'sword'>('fruit');
+  const [platform, setPlatform] = useState<Platform>(initialPlatform);
+
+  const talents = allTalents.filter((t) => t.platform === platform);
+
+  const handlePlatformChange = (next: Platform) => {
+    setPlatform(next);
+    syncPlatformToUrl(next);
+  };
 
   const activeCategory = {
     label: activeTab === 'fruit' ? 'FRUIT TALENTS' : 'SWORD TALENTS',
@@ -36,7 +52,9 @@ export default function TalentsView({ talents }: { talents: Talent[] }) {
 
   return (
     <main className="min-h-screen bg-black relative">
-      <Navbar />
+      <Suspense fallback={null}>
+        <Navbar />
+      </Suspense>
 
       <motion.section
         initial={{ opacity: 0 }}
@@ -81,11 +99,19 @@ export default function TalentsView({ talents }: { talents: Talent[] }) {
 
       <HorizontalRule />
 
+      <div className="pt-12">
+        <PlatformTabs
+          active={platform}
+          onChange={handlePlatformChange}
+          layoutId="talents-platform-underline"
+        />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.35 }}
-        className="flex justify-center px-5 pt-12 pb-2"
+        className="flex justify-center px-5 pb-2"
       >
         <div
           className="relative inline-flex gap-1 p-1.5 rounded-2xl"
@@ -189,7 +215,7 @@ export default function TalentsView({ talents }: { talents: Talent[] }) {
 
       <AnimatePresence mode="wait">
         <motion.section
-          key={activeTab}
+          key={`${platform}-${activeTab}`}
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -216,7 +242,7 @@ export default function TalentsView({ talents }: { talents: Talent[] }) {
 
                 return (
                   <TalentCard
-                    key={`${activeTab}-${talent.name}`}
+                    key={`${platform}-${activeTab}-${talent.name}`}
                     talent={{
                       name: talent.name,
                       holder: talent.holder,
