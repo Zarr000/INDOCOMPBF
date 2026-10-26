@@ -248,23 +248,7 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      <motion.div
-        animate={{ y: [0, 10, 0], opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 2.5, repeat: Infinity }}
-        className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 flex flex-col items-center gap-2 sm:bottom-7"
-      >
-        <div
-          className="w-5 h-8 rounded-full border flex items-start justify-center p-1.5"
-          style={{ borderColor: 'rgba(255,255,255,0.20)' }}
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-            className="w-0.5 h-2 rounded-full"
-            style={{ background: 'rgba(255,255,255,0.5)' }}
-          />
-        </div>
-      </motion.div>
+
     </section>
   );
 }
